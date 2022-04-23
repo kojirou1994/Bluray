@@ -6,6 +6,7 @@ struct BDUtility: ParsableCommand {
     .init(
       subcommands:[
         MainPlaylist.self,
+        ReadPlaylist.self,
       ]
     )
   }

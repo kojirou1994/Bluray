@@ -28,6 +28,8 @@ public enum BlurayError: Error {
   case bd_open
   case bd_get_title_info
   case bd_get_main_title
+  case bd_select_playlist
+  case bd_get_disc_info
 }
 
 extension Bluray {
@@ -70,6 +72,7 @@ public extension Bluray.TitleFlags {
 }
 
 public extension Bluray {
+
   func getTitles(flags: TitleFlags, minTitleLength: UInt32) -> UInt32 {
     bd_get_titles(bd, flags.rawValue, minTitleLength)
   }
@@ -78,12 +81,38 @@ public extension Bluray {
     try .init(info: bd_get_title_info(bd, titleIndex, angle).unwrap(BlurayError.bd_get_title_info))
   }
 
+  func getDiscInfo() throws {
+    try bd_get_disc_info(bd).unwrap(BlurayError.bd_get_disc_info)
+  }
+
   func getMainTitleIndex() throws -> Int32 {
     let v = bd_get_main_title(bd)
     if v == -1 {
       throw BlurayError.bd_get_main_title
     }
     return v
+  }
+
+  func select(playlist: UInt32) throws {
+    try preconditionOrThrow(
+      bd_select_playlist(bd, playlist) == 1,
+      BlurayError.bd_select_playlist
+    )
+  }
+
+  func select(angle: UInt32) throws {
+    try preconditionOrThrow(
+      bd_select_angle(bd, angle) == 1,
+      BlurayError.bd_select_playlist
+    )
+  }
+
+  func seek(chapter: UInt32) -> Int64 {
+    bd_seek_chapter(bd, chapter)
+  }
+
+  func read(into buffer: UnsafeMutableBufferPointer<UInt8>) throws -> Int32 {
+    bd_read(bd, buffer.baseAddress, numericCast(buffer.count))
   }
 }
 
@@ -101,6 +130,7 @@ public final class TitleInfo {
 }
 
 public extension TitleInfo {
+
   var index: UInt32 { info.pointee.idx }
 
   var playlist: UInt32 { info.pointee.playlist }

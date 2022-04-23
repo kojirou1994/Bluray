@@ -5,13 +5,12 @@ import PackageDescription
 let package = Package(
   name: "Bluray",
   products: [
-    .library(
-      name: "Bluray",
-      targets: ["Bluray"]),
+    .library(name: "Bluray", targets: ["Bluray"]),
+    .executable(name: "bd-utility", targets: ["bd-utility"]),
   ],
   dependencies: [
     .package(url: "https://github.com/kojirou1994/Precondition.git", from: "1.0.0"),
-    .package(url: "https://github.com/apple/swift-argument-parser.git", from: "0.3.0"),
+    .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.0.0"),
   ],
   targets: [
     .systemLibrary(
@@ -22,13 +21,13 @@ let package = Package(
       name: "Bluray",
       dependencies: [
         "CBluray",
-        "Precondition",
+        .product(name: "Precondition", package: "Precondition"),
       ]),
     .executableTarget(
       name: "bd-utility",
       dependencies: [
         "Bluray",
-        "Precondition",
+        .product(name: "Precondition", package: "Precondition"),
         .product(name: "ArgumentParser", package: "swift-argument-parser"),
       ]),
     .testTarget(
