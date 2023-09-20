@@ -1,13 +1,16 @@
 import CBluray
 import Precondition
 
-public final class Bluray {
+public struct Bluray: ~Copyable {
+  @usableFromInline
   internal init() throws {
     self.bd = try bd_init().unwrap(BlurayError.bd_init)
   }
 
-  let bd: OpaquePointer
+  @usableFromInline
+  internal let bd: OpaquePointer
 
+  @inlinable
   deinit {
     bd_close(bd)
   }
@@ -15,7 +18,9 @@ public final class Bluray {
 }
 
 public extension Bluray {
-  static func open(devicePath: String, keyfilePath: String? = nil) throws -> Bluray {
+  @_alwaysEmitIntoClient
+  @inlinable
+  static func open(devicePath: UnsafePointer<Int8>, keyfilePath: UnsafePointer<Int8>? = nil) throws -> Bluray {
     let bd = try Bluray()
     try preconditionOrThrow(bd_open_disc(bd.bd, devicePath, keyfilePath) == 1,
                             BlurayError.bd_open)
@@ -73,18 +78,22 @@ public extension Bluray.TitleFlags {
 
 public extension Bluray {
 
+  @_alwaysEmitIntoClient
   func getTitles(flags: TitleFlags, minTitleLength: UInt32) -> UInt32 {
     bd_get_titles(bd, flags.rawValue, minTitleLength)
   }
 
+  @_alwaysEmitIntoClient
   func getTitleInfo(titleIndex: UInt32, angle: UInt32) throws -> TitleInfo {
     try .init(info: bd_get_title_info(bd, titleIndex, angle).unwrap(BlurayError.bd_get_title_info))
   }
 
+  @_alwaysEmitIntoClient
   func getDiscInfo() throws {
     try bd_get_disc_info(bd).unwrap(BlurayError.bd_get_disc_info)
   }
 
+  @_alwaysEmitIntoClient
   func getMainTitleIndex() throws -> Int32 {
     let v = bd_get_main_title(bd)
     if v == -1 {
@@ -93,6 +102,7 @@ public extension Bluray {
     return v
   }
 
+  @_alwaysEmitIntoClient
   func select(playlist: UInt32) throws {
     try preconditionOrThrow(
       bd_select_playlist(bd, playlist) == 1,
@@ -100,6 +110,7 @@ public extension Bluray {
     )
   }
 
+  @_alwaysEmitIntoClient
   func select(angle: UInt32) throws {
     try preconditionOrThrow(
       bd_select_angle(bd, angle) == 1,
@@ -107,22 +118,27 @@ public extension Bluray {
     )
   }
 
+  @_alwaysEmitIntoClient
   func seek(chapter: UInt32) -> Int64 {
     bd_seek_chapter(bd, chapter)
   }
 
+  @_alwaysEmitIntoClient
   func read(into buffer: UnsafeMutableBufferPointer<UInt8>) throws -> Int32 {
     bd_read(bd, buffer.baseAddress, numericCast(buffer.count))
   }
 }
 
-public final class TitleInfo {
+public struct TitleInfo: ~Copyable {
+  @usableFromInline
   internal init(info: UnsafeMutablePointer<BLURAY_TITLE_INFO>) {
     self.info = info
   }
 
-  let info: UnsafeMutablePointer<BLURAY_TITLE_INFO>
+  @usableFromInline
+  internal let info: UnsafeMutablePointer<BLURAY_TITLE_INFO>
 
+  @inlinable
   deinit {
     bd_free_title_info(info)
   }
@@ -131,26 +147,34 @@ public final class TitleInfo {
 
 public extension TitleInfo {
 
+  @_alwaysEmitIntoClient
   var index: UInt32 { info.pointee.idx }
 
+  @_alwaysEmitIntoClient
   var playlist: UInt32 { info.pointee.playlist }
 
+  @_alwaysEmitIntoClient
   var duration: UInt64 { info.pointee.duration }
 
+  @_alwaysEmitIntoClient
   var angleCount: UInt8 { info.pointee.angle_count }
 
+  @_alwaysEmitIntoClient
   var clips: UnsafeMutableBufferPointer<Bluray.ClipInfo> {
     .init(start: .init(OpaquePointer(info.pointee.clips)), count: Int(info.pointee.clip_count))
   }
 
+  @_alwaysEmitIntoClient
   var chapters: UnsafeMutableBufferPointer<Bluray.Chapter> {
     .init(start: .init(OpaquePointer(info.pointee.chapters)), count: Int(info.pointee.chapter_count))
   }
 
+  @_alwaysEmitIntoClient
   var marks: UnsafeMutableBufferPointer<Bluray.TitleMark> {
     .init(start: .init(OpaquePointer(info.pointee.marks)), count: Int(info.pointee.mark_count))
   }
 
+  @_alwaysEmitIntoClient
   var mvc_base_view_r_flag: UInt8 {
     info.pointee.mvc_base_view_r_flag
   }
