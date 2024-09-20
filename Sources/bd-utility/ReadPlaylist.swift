@@ -1,8 +1,10 @@
 import ArgumentParser
 import Bluray
+#if canImport(System)
 import System
-import CBluray
-import Foundation
+#else
+import SystemPackage
+#endif
 
 struct ReadPlaylist: ParsableCommand {
 
