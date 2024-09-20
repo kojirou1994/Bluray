@@ -3,7 +3,7 @@ import Precondition
 
 public struct Bluray: ~Copyable {
   @usableFromInline
-  internal init() throws {
+  internal init() throws(BlurayError) {
     self.bd = try bd_init().unwrap(BlurayError.bd_init)
   }
 
@@ -20,7 +20,7 @@ public struct Bluray: ~Copyable {
 public extension Bluray {
   @_alwaysEmitIntoClient
   @inlinable
-  static func open(devicePath: UnsafePointer<Int8>, keyfilePath: UnsafePointer<Int8>? = nil) throws -> Bluray {
+  static func open(devicePath: UnsafePointer<Int8>, keyfilePath: UnsafePointer<Int8>? = nil) throws(BlurayError) -> Bluray {
     let bd = try Bluray()
     try preconditionOrThrow(bd_open_disc(bd.bd, devicePath, keyfilePath) == 1,
                             BlurayError.bd_open)
@@ -84,17 +84,17 @@ public extension Bluray {
   }
 
   @_alwaysEmitIntoClient
-  func getTitleInfo(titleIndex: UInt32, angle: UInt32) throws -> TitleInfo {
+  func getTitleInfo(titleIndex: UInt32, angle: UInt32) throws(BlurayError) -> TitleInfo {
     try .init(info: bd_get_title_info(bd, titleIndex, angle).unwrap(BlurayError.bd_get_title_info))
   }
 
   @_alwaysEmitIntoClient
-  func getDiscInfo() throws {
+  func getDiscInfo() throws(BlurayError) {
     try bd_get_disc_info(bd).unwrap(BlurayError.bd_get_disc_info)
   }
 
   @_alwaysEmitIntoClient
-  func getMainTitleIndex() throws -> Int32 {
+  func getMainTitleIndex() throws(BlurayError) -> Int32 {
     let v = bd_get_main_title(bd)
     if v == -1 {
       throw BlurayError.bd_get_main_title
@@ -103,7 +103,7 @@ public extension Bluray {
   }
 
   @_alwaysEmitIntoClient
-  func select(playlist: UInt32) throws {
+  func select(playlist: UInt32) throws(BlurayError) {
     try preconditionOrThrow(
       bd_select_playlist(bd, playlist) == 1,
       BlurayError.bd_select_playlist
@@ -111,7 +111,7 @@ public extension Bluray {
   }
 
   @_alwaysEmitIntoClient
-  func select(angle: UInt32) throws {
+  func select(angle: UInt32) throws(BlurayError) {
     try preconditionOrThrow(
       bd_select_angle(bd, angle) == 1,
       BlurayError.bd_select_playlist
@@ -124,7 +124,7 @@ public extension Bluray {
   }
 
   @_alwaysEmitIntoClient
-  func read(into buffer: UnsafeMutableBufferPointer<UInt8>) throws -> Int32 {
+  func read(into buffer: UnsafeMutableBufferPointer<UInt8>) throws(BlurayError) -> Int32 {
     bd_read(bd, buffer.baseAddress, numericCast(buffer.count))
   }
 }

@@ -1,4 +1,4 @@
-// swift-tools-version: 5.9
+// swift-tools-version: 6.0
 
 import PackageDescription
 
@@ -15,7 +15,10 @@ let package = Package(
   targets: [
     .systemLibrary(
       name: "CBluray",
-      pkgConfig: "libbluray"
+      pkgConfig: "libbluray",
+      providers: [
+        .brew(["libbluray"]),
+      ]
     ),
     .target(
       name: "Bluray",
